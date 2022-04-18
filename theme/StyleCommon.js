@@ -93,6 +93,12 @@ const StyleCommon = StyleSheet.create({
     ButtonCenter: {
         flex:1, 
         justifyContent: 'center'
+    },
+    TextInputMarginVertical:{
+        marginVertical: 10
+    },
+    marginHorizontalDefault:{
+        marginHorizontal: 20
     }
 });
 export default StyleCommon;

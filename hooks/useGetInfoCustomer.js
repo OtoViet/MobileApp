@@ -1,8 +1,8 @@
 import FormApi from '../api/formApi.js';
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+// import { useNavigate } from 'react-router-dom';
 function useGetInfoCustomer() {
-    const navigate = useNavigate();
+    // const navigate = useNavigate();
     const [info, setInfo] = useState([]);
     const [loading, setLoading] = useState(true);
     const getInfoCustomer = () => {
@@ -12,7 +12,7 @@ function useGetInfoCustomer() {
         })
         .catch((error) => {
             console.log(error);
-            navigate('/login');
+            // navigate('/login');
         });
     };
     useEffect(() => {

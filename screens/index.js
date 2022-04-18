@@ -2,6 +2,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { NavigationContainer } from '@react-navigation/native';
 import DetaiService from './Service/Detail';
 import Booking from './Service/Booking';
+import ContactInfo from './Service/ContactInfo';
 import Navigation from '../navigation/Drawer';
 import Theme from '../theme';
 
@@ -22,6 +23,14 @@ export default function Screen() {
           <Stack.Screen name="Booking" component={Booking}
             options={{
             title: "Đặt lịch",
+            headerStyle: {
+              backgroundColor: Theme.Theme.colors.primary,
+            },
+            headerTintColor: '#fff',
+          }} />
+          <Stack.Screen name="ContactInfo" component={ContactInfo}
+            options={{
+            title: "Thông tin liên hệ",
             headerStyle: {
               backgroundColor: Theme.Theme.colors.primary,
             },

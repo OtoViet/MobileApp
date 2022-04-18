@@ -1,19 +1,38 @@
-import { Title, TextInput, Button, HelperText } from 'react-native-paper';
-import {useState} from 'react';
+import moment from 'moment';
 import * as Yup from 'yup';
-import { View, Image, ScrollView } from 'react-native';
-// import DateTimePicker from '@react-native-community/datetimepicker';
-import { useFormik } from 'formik';
+import { useState } from 'react';
 import Theme from '../../theme';
-import CarImage from '../../assets/car.png';
-import FormApi from '../../api/formApi';
+import { useFormik } from 'formik';
 import GoogleLogin from './Google';
+import FormApi from '../../api/formApi';
+import CarImage from '../../assets/car.png';
+import { View, Image, ScrollView, TouchableOpacity } from 'react-native';
+import DatePicker from '@react-native-community/datetimepicker';
+import DateTimePickerModal from "react-native-modal-datetime-picker";
+import { Title, TextInput, Button, HelperText } from 'react-native-paper';
+
 export default function Register({ navigation }) {
     const [data, setData] = useState(null);
-    
-    const handleRedirect = (value,data)=>{
+    const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+    const [valueDateShow, setValueDateShow] = useState(null);
+    const [valueDate, setValueDate] = useState();
+    const showDatePicker = () => {
+        setDatePickerVisibility(true);
+    };
+    const hideDatePicker = () => {
+        setDatePickerVisibility(false);
+    };
+
+    const handleConfirm = (date) => {
+        console.log("A date has been picked: ", date);
+        setValueDate(date);
+        formik.setFieldValue('dateOfBirth', date);
+        setValueDateShow(moment(date).format('DD/MM/YYYY'));
+        hideDatePicker();
+    };
+    const handleRedirect = (value, data) => {
         setData(data);
-        navigation.navigate(value,data);
+        navigation.navigate(value, data);
     }
     const registerSchema = Yup.object().shape({
         email: Yup.string()
@@ -42,7 +61,7 @@ export default function Register({ navigation }) {
         firstName: Yup.string().required('Vui lòng nhập tên của bạn'),
         lastName: Yup.string().required('Vui lòng nhập họ của bạn'),
         phoneNumber: Yup.number().typeError('Vui lòng nhập số').required('Vui lòng nhập số điện thoại').min(100000000, 'Số điện thoại không hợp lệ'),
-        // dateOfBirth: Yup.date().typeError('Vui lòng chọn ngày sinh').max(new Date(), "Ngày sinh không hợp lệ"),
+        dateOfBirth: Yup.date().typeError('Vui lòng chọn ngày sinh').max(new Date(), "Ngày sinh không hợp lệ"),
 
     });
     const formik = useFormik({
@@ -53,7 +72,7 @@ export default function Register({ navigation }) {
             firstName: '',
             lastName: '',
             phoneNumber: '',
-            // dateOfBirth: '',
+            dateOfBirth: null,
         },
         validationSchema: registerSchema,
         onSubmit: (values) => {
@@ -76,12 +95,7 @@ export default function Register({ navigation }) {
                 <Title style={{ textAlign: 'center', fontSize: 28 }}>
                     Đăng kí tài khoản mới
                 </Title>
-                {/* <DateTimePicker
-                testID="dateTimePicker"
-                value={new Date()}
-                mode={'date'}
-                is24Hour
-              /> */}
+
                 <TextInput
                     style={Theme.StyleCommon.TextInput}
                     name="lastName"
@@ -104,6 +118,33 @@ export default function Register({ navigation }) {
                 />
                 <HelperText type="error" visible={formik.touched.firstName && Boolean(formik.errors.firstName)}>
                     {formik.touched.firstName && formik.errors.firstName}
+                </HelperText>
+
+                <TouchableOpacity
+                    activeOpaticy={1}
+                    onPress={showDatePicker}>
+                    <TextInput
+                        label="Ngày sinh"
+                        name="dateOfBirth"
+                        value={valueDateShow}
+                        mode="outlined"
+                        editable={false} // optional
+                        onChangeText={text => {
+                            formik.setFieldValue('dateOfBirth', text);
+                            setValueDateShow(text);
+                        }}
+                    />
+                </TouchableOpacity>
+
+                <DateTimePickerModal
+                    maximumDate={new Date()}
+                    isVisible={isDatePickerVisible}
+                    mode="date"
+                    onConfirm={handleConfirm}
+                    onCancel={hideDatePicker}
+                />
+                <HelperText type="error" visible={formik.touched.dateOfBirth && Boolean(formik.errors.dateOfBirth)}>
+                    {formik.touched.dateOfBirth && formik.errors.dateOfBirth}
                 </HelperText>
                 <TextInput
                     style={Theme.StyleCommon.TextInput}
@@ -154,19 +195,19 @@ export default function Register({ navigation }) {
                     {formik.touched.rePassword && formik.errors.rePassword}
                 </HelperText>
                 <Button mode="contained"
-                    style={{marginBottom:20}}
+                    style={{ marginBottom: 20 }}
                     color={Theme.Theme.colors.secondary}
                     dark={true}
                     labelStyle={{ padding: 5 }}
                     onPress={formik.handleSubmit}>
                     Đăng kí
                 </Button>
-                <Button mode="text" 
-                color={Theme.Theme.colors.primary}
-                onPress={() => navigation.navigate('Login')}>
+                <Button mode="text"
+                    color={Theme.Theme.colors.primary}
+                    onPress={() => navigation.navigate('Login')}>
                     Đăng nhập với tài khoản
                 </Button>
-                {data? <GoogleLogin redirect={handleRedirect} /> : null}
+                {data ? <GoogleLogin redirect={handleRedirect} /> : null}
             </View>
         </ScrollView>
     )
