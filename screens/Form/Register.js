@@ -7,7 +7,6 @@ import GoogleLogin from './Google';
 import FormApi from '../../api/formApi';
 import CarImage from '../../assets/car.png';
 import { View, Image, ScrollView, TouchableOpacity } from 'react-native';
-import DatePicker from '@react-native-community/datetimepicker';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { Title, TextInput, Button, HelperText } from 'react-native-paper';
 
@@ -150,6 +149,7 @@ export default function Register({ navigation }) {
                     style={Theme.StyleCommon.TextInput}
                     name="phoneNumber"
                     label="Số điện thoại"
+                    keyboardType="numeric"
                     mode="outlined"
                     value={formik.values.phoneNumber}
                     onBlur={formik.handleBlur('phoneNumber')}
@@ -162,6 +162,7 @@ export default function Register({ navigation }) {
                     style={Theme.StyleCommon.TextInput}
                     name="email"
                     label="Email"
+                    keyboardType="email-address"
                     mode="outlined"
                     value={formik.values.email}
                     onBlur={formik.handleBlur('email')}
@@ -207,7 +208,7 @@ export default function Register({ navigation }) {
                     onPress={() => navigation.navigate('Login')}>
                     Đăng nhập với tài khoản
                 </Button>
-                {data ? <GoogleLogin redirect={handleRedirect} /> : null}
+                <GoogleLogin redirect={handleRedirect} />
             </View>
         </ScrollView>
     )

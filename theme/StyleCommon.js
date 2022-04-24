@@ -13,7 +13,7 @@ const StyleCommon = StyleSheet.create({
         marginTop: StatusBar.currentHeight
     },
     Form: {
-        margin: 10,
+        margin: 20,
     },
     TextInput: {
         borderRadius: 10,

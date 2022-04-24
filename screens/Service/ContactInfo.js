@@ -17,21 +17,36 @@ import {
 
 export default function ContactInfo({ route, navigation }) {
     const { data } = route.params;
+    const [dataForm, setDataForm] = useState();
     const [loading, listStore] = useGetAllStore();
     const [isSwitchOn, setIsSwitchOn] = useState(false);
-    const [text, setText] = useState("");
     const [loadingInfoCustomer, infoCustomer] = useGetInfoCustomer();
+
     const listCarePoint = listStore;
-    
+
     const onToggleSwitch = () => {
         setIsSwitchOn(!isSwitchOn);
-        if (!loadingInfoCustomer && isSwitchOn) {
+        if (!loadingInfoCustomer && !isSwitchOn) {
             formik.setFieldValue('name', infoCustomer.fullName);
             formik.setFieldValue('email', infoCustomer.email);
             formik.setFieldValue('phoneNumber', infoCustomer.phoneNumber);
         }
-        if (!isSwitchOn) {
+        if (isSwitchOn) {
             formik.handleReset();
+        }
+    };
+    const handleSendRequest = async () => {
+        if (dataForm) {
+            let dataSend = { ...dataForm, ...data };
+            if (!loadingInfoCustomer) {
+                if (infoCustomer) {
+                    dataSend.defaultEmail = infoCustomer.email;
+                }
+            }
+            // console.log(dataSend);
+            dataSend.totalPrice = Math.round(totalPrice * ((100 - data.percentSale) / 100))
+            navigation.navigate("Checkout", { data: dataSend });
+            // alert(JSON.stringify(dataSend));
         }
     };
     const ContactSchema = Yup.object().shape({
@@ -79,7 +94,7 @@ export default function ContactInfo({ route, navigation }) {
     totalPrice += 100000 * (data.carSize === "carMedium" ? 1 : 2);
     totalPrice += data.priceCombo;
 
-    if (loading || loadingInfoCustomer) return <Loading.Origin color={Theme.colors.secondary} size={50} />;
+    if (loading || loadingInfoCustomer == true) return <Loading.Origin color={Theme.colors.secondary} size={50} />;
     return (
         <>
             <ScrollView>
@@ -87,12 +102,13 @@ export default function ContactInfo({ route, navigation }) {
                     <Headline>
                         Thông tin liên hệ
                     </Headline>
-                    <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'center' }}>
-                        <Text>(Nhập mới)</Text>
-                        <Switch value={isSwitchOn}
+                    <View style={{
+                        flex: 1, flexDirection: 'row',
+                        justifyContent: 'center'
+                    }}>
+                        {loading !== 'error' ? <Switch value={isSwitchOn}
                             color={Theme.colors.secondary}
-                            onValueChange={onToggleSwitch} />
-                        <Text>(Mặc định)</Text>
+                            onValueChange={onToggleSwitch} /> : null}
                     </View>
                 </View>
                 <View style={{ marginHorizontal: 20 }}>
@@ -100,9 +116,9 @@ export default function ContactInfo({ route, navigation }) {
                         name="name"
                         label="Họ tên"
                         mode="outlined"
-                        value={text}
+                        value={formik.values.name}
                         style={StyleCommon.TextInputMarginVertical}
-                        onChangeText={text => setText(text)}
+                        onChangeText={text => formik.setFieldValue('name', text)}
                     />
                     <HelperText type="error" visible={formik.touched.name && Boolean(formik.errors.name)}>
                         {formik.touched.name && formik.errors.name}
@@ -111,9 +127,10 @@ export default function ContactInfo({ route, navigation }) {
                         label="Địa chỉ email"
                         name="email"
                         mode="outlined"
-                        value={text}
+                        keyboardType="email-address"
+                        value={formik.values.email}
                         style={StyleCommon.TextInputMarginVertical}
-                        onChangeText={text => setText(text)}
+                        onChangeText={text => formik.setFieldValue('email', text)}
                     />
                     <HelperText type="error" visible={formik.touched.email && Boolean(formik.errors.email)}>
                         {formik.touched.email && formik.errors.email}
@@ -121,10 +138,11 @@ export default function ContactInfo({ route, navigation }) {
                     <TextInput
                         name="phoneNumber"
                         label="Số điện thoại"
+                        keyboardType="numeric"
                         mode="outlined"
-                        value={text}
+                        value={formik.values.phoneNumber}
                         style={StyleCommon.TextInputMarginVertical}
-                        onChangeText={text => setText(text)}
+                        onChangeText={text => formik.setFieldValue('phoneNumber', text)}
                     />
                     <HelperText type="error" visible={formik.touched.phoneNumber && Boolean(formik.errors.phoneNumber)}>
                         {formik.touched.phoneNumber && formik.errors.phoneNumber}
@@ -133,11 +151,11 @@ export default function ContactInfo({ route, navigation }) {
                         name="address"
                         label="Địa chỉ"
                         mode="outlined"
-                        value={text}
+                        value={formik.values.address}
                         style={StyleCommon.TextInputMarginVertical}
                         multiline={true}
                         numberOfLines={4}
-                        onChangeText={text => setText(text)}
+                        onChangeText={text => formik.setFieldValue('address', text)}
                     />
                     <HelperText type="error" visible={formik.touched.address && Boolean(formik.errors.address)}>
                         {formik.touched.address && formik.errors.address}
@@ -145,15 +163,17 @@ export default function ContactInfo({ route, navigation }) {
                     <TextInput
                         label="Yêu cầu phục vụ"
                         mode="outlined"
-                        value={text}
+                        name="description"
+                        value={formik.values.description}
                         style={StyleCommon.TextInputMarginVertical}
                         multiline={true}
                         numberOfLines={4}
-                        onChangeText={text => setText(text)}
+                        onChangeText={text => formik.setFieldValue('description', text)}
                     />
                     <Button mode="contained"
                         style={{ marginVertical: 20 }}
-                        color={Theme.colors.secondary}>
+                        color={Theme.colors.secondary}
+                        onPress={formik.handleSubmit}>
                         Xác nhận
                     </Button>
                 </View>
@@ -192,7 +212,8 @@ export default function ContactInfo({ route, navigation }) {
                     })
                     }
                     <Title>
-                        Tổng tiền: <Text style={{ color: Theme.colors.secondary }}>{Math.round(totalPrice * ((100 - data.percentSale) / 100)).toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,') + '₫'}</Text>
+                        Tổng tiền: <Text style={{ color: Theme.colors.secondary }}>{Math.round(totalPrice * ((100 - data.percentSale) / 100)).toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,') + '₫ '}</Text>
+                        {data.percentSale > 0 ? <Text style={{ fontSize: 14 }}>(Đã giảm {data.percentSale}%)</Text> : null}
                     </Title>
                     <Title>
                         Thời gian hẹn: <Text style={{ color: Theme.colors.secondary }}>{moment(new Date(data.time)).locale('vi').format('LLLL')}</Text>
@@ -202,27 +223,33 @@ export default function ContactInfo({ route, navigation }) {
                             Thông tin người đặt
                         </Headline>
                     </View>
-                    <Title>
-                        Tên người đặt:
-                    </Title>
-                    <Title>
-                        Email:
-                    </Title>
-                    <Title>
-                        Số điện thoại:
-                    </Title>
-                    <Title>
-                        Địa chỉ:
-                    </Title>
-                    <Title>
-                        Yêu cầu:
-                    </Title>
-                    <Button mode="contained"
-                        icon="card-bulleted"
-                        style={{ marginVertical: 20 }}
-                        color={Theme.colors.secondary}>
-                        Chuyển sang thanh toán
-                    </Button>
+                    {
+                        dataForm ?
+                            <View>
+                                <Title>
+                                    Tên người đặt: {dataForm.name}
+                                </Title>
+                                <Title>
+                                    Email: {dataForm.email}
+                                </Title>
+                                <Title>
+                                    Số điện thoại: {dataForm.phoneNumber}
+                                </Title>
+                                <Title>
+                                    Địa chỉ: {dataForm.address}
+                                </Title>
+                                <Title>
+                                    Yêu cầu: {dataForm.description}
+                                </Title>
+                                <Button mode="contained"
+                                    icon="card-bulleted"
+                                    style={{ marginVertical: 20 }}
+                                    color={Theme.colors.secondary}
+                                    onPress={handleSendRequest} >
+                                    Chuyển sang thanh toán
+                                </Button>
+                            </View> : null
+                    }
                 </View>
             </ScrollView>
         </>

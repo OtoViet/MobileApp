@@ -1,16 +1,19 @@
 import moment from 'moment';
 import 'moment/locale/vi';
-import { useState, useEffect } from 'react';
 import Theme from '../../theme/Theme';
+import FormApi from '../../api/formApi';
+import { useState, useEffect } from 'react';
 import { PricingCard } from '@rneui/themed';
 import Loading from '../../components/Loading';
-import { ScrollView, View, Picker, Dimensions, Alert } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
+import { ScrollView, View, Dimensions, Alert } from 'react-native';
 import useGetAllStore from '../../hooks/useGetAllStore';
 import { Table, Row } from 'react-native-table-component';
 import useGetAllProduct from '../../hooks/useGetAllProduct';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { Checkbox, Text, Headline, RadioButton, Button, TextInput } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+
 const Booking = ({ route, navigation }) => {
     const { data } = route.params;
     const tableHead = ['Thứ tự', 'Mã dịch vụ', 'Tên dịch vụ', 'Giá tiền'];
@@ -19,8 +22,6 @@ const Booking = ({ route, navigation }) => {
     const [iconPricingCheckCombo1, setIconPricingCheckCombo1] = useState('check-circle-outline');
     const [iconPricingCheckCombo2, setIconPricingCheckCombo2] = useState('check-circle-outline');
     const [iconPricingCheckCombo3, setIconPricingCheckCombo3] = useState('check-circle-outline');
-    
-    const [text, setText] = useState("");
     const [carSize, setCarSize] = useState(null);
     const [loading, products] = useGetAllProduct();
     const [carePoint, setCarePoint] = useState(null);
@@ -32,6 +33,8 @@ const Booking = ({ route, navigation }) => {
     const [percentSale, setPercentSale] = useState(0);
     const [combo, setCombo] = useState(null);
     const [priceCombo, setPriceCombo] = useState(0);
+    const [discount, setDiscount] = useState(null);
+    const [textDiscount, setTextDiscount] = useState(null);
     const showDatePicker = () => {
         setDatePickerVisibility(true);
     };
@@ -45,6 +48,16 @@ const Booking = ({ route, navigation }) => {
         setValueDate(date);
         hideDatePicker();
     };
+    const handleSubmitDiscount = () => {
+        FormApi.getDiscountByCode(discount).then(res => {
+            setPercentSale(res.percentSale);
+            setTextDiscount(`Bạn được giảm ${res.percentSale}% trên tổng hóa đơn`);
+        })
+            .catch(err => {
+                console.log(err);
+                setTextDiscount(`Mã giảm giá không hợp lệ`);
+            });
+    };
     const handleOnClicContinue = () => {
         let dataSend = {};
         dataSend.combo = combo;
@@ -57,25 +70,25 @@ const Booking = ({ route, navigation }) => {
         dataSend.priceCombo = priceCombo;
         dataSend.percentSale = percentSale;
 
-        if (!carePoint || !carSize || dataSend.listServiceChoose.length<=0 || !valueDate) 
+        if (!carePoint || !carSize || dataSend.listServiceChoose.length <= 0 || !valueDate)
             Alert.alert('Thông báo', 'Bạn cần phải chọn các thông tin bên trên trừ gói combo dịch vụ!');
-        else navigation.navigate('ContactInfo',{data:dataSend});
+        else navigation.navigate('ContactInfo', { data: dataSend });
     };
-    const handleButtonCombo1Press=()=>{
+    const handleButtonCombo1Press = () => {
         setCombo('combo1');
         setPriceCombo(totalPriceCombo1);
         setIconPricingCheckCombo1('check-circle');
         setIconPricingCheckCombo2('check-circle-outline');
         setIconPricingCheckCombo3('check-circle-outline');
     };
-    const handleButtonCombo2Press=()=>{
+    const handleButtonCombo2Press = () => {
         setCombo('combo2');
         setPriceCombo(totalPriceCombo2);
         setIconPricingCheckCombo2('check-circle');
         setIconPricingCheckCombo3('check-circle-outline');
         setIconPricingCheckCombo1('check-circle-outline');
     };
-    const handleButtonCombo3Press=()=>{
+    const handleButtonCombo3Press = () => {
         setCombo('combo3');
         setPriceCombo(totalPriceCombo3);
         setIconPricingCheckCombo3('check-circle');
@@ -143,6 +156,7 @@ const Booking = ({ route, navigation }) => {
                         style={{ height: 50, width: Dimensions.get('window').width - 100 }}
                         onValueChange={(itemValue, itemIndex) => setCarePoint(itemValue)}
                     >
+                        <Picker.Item value='' enabled={false} label='Chọn chi nhánh' />
                         {stores.map((item, index) => <Picker.Item key={index} label={item.name} value={item.numOfStore} />)}
                     </Picker>
                 </View>
@@ -190,7 +204,7 @@ const Booking = ({ route, navigation }) => {
                     title="GÓI CƠ BẢN"
                     onButtonPress={handleButtonCombo1Press}
                     pricingStyle={{ fontSize: 30 }}
-                    price={parseInt(totalPriceCombo1).toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')+'₫'}
+                    price={parseInt(totalPriceCombo1).toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,') + '₫'}
                     info={listProductCombo1.map((item, index) =>
                         item.productName
                     )}
@@ -201,7 +215,7 @@ const Booking = ({ route, navigation }) => {
                     title="GÓI PREMIUM"
                     onButtonPress={handleButtonCombo2Press}
                     pricingStyle={{ fontSize: 30 }}
-                    price={parseInt(totalPriceCombo2).toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')+'₫'}
+                    price={parseInt(totalPriceCombo2).toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,') + '₫'}
                     info={listProductCombo2.map((item, index) =>
                         item.productName
                     )}
@@ -212,7 +226,7 @@ const Booking = ({ route, navigation }) => {
                     title="GÓI SPREMIUM"
                     onButtonPress={handleButtonCombo3Press}
                     pricingStyle={{ fontSize: 30 }}
-                    price={parseInt(totalPriceCombo3).toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')+'₫'}
+                    price={parseInt(totalPriceCombo3).toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,') + '₫'}
                     info={listProductCombo3.map((item, index) =>
                         item.productName
                     )}
@@ -230,15 +244,16 @@ const Booking = ({ route, navigation }) => {
                     <ScrollView style={{ marginTop: -1 }}>
                         <Table borderStyle={{ borderWidth: 1, borderColor: '#C1C0B9' }}>
                             {
-                                tableData.map((rowData, index) => (
-                                    <Row
+                                tableData.map((rowData, index) => {
+                                    let backgroundIndex = index % 2 ? 'white' :'#f3f6f4';
+                                    return <Row
                                         key={index}
                                         data={rowData}
                                         widthArr={widthArr}
-                                        style={[{ height: 40, backgroundColor: 'white' }, index % 2 && { backgroundColor: '#f3f6f4' }]}
+                                        style={{ height: 40, backgroundColor:backgroundIndex }}
                                         textStyle={{ textAlign: 'center', fontWeight: '100' }}
-                                    />
-                                ))
+                                    />;
+                                })
                             }
                         </Table>
                     </ScrollView>
@@ -269,11 +284,15 @@ const Booking = ({ route, navigation }) => {
                 style={{ marginVertical: 20, marginHorizontal: 20, display: displayVocher }}
                 label="Mã khuyến mãi"
                 mode='outlined'
-                value={text}
-                onChangeText={text => setText(text)}
-                right={<TextInput.Icon name="send" onPress={() => alert('check code')} />}
+                value={discount}
+                forceTextInputFocus={false}
+                onEndEditing={handleSubmitDiscount}
+                onChangeText={text => setDiscount(text)}
+                right={<TextInput.Icon name="send" onPress={handleSubmitDiscount} />}
             />
-
+            {textDiscount ? <Text style={{ textAlign: 'justify', marginHorizontal: 20 }}>
+                {textDiscount}
+            </Text> : null}
             <Button style={{ marginVertical: 20, marginHorizontal: 20 }}
                 color={Theme.colors.secondary}
                 mode="contained" onPress={handleOnClicContinue}>

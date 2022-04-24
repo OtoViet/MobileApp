@@ -1,5 +1,6 @@
 import FormApi from '../api/formApi.js';
 import { useState, useEffect } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 function useGetAllOrder() {
     const [Orders, setOrders] = useState([]);
@@ -7,10 +8,12 @@ function useGetAllOrder() {
     const getListOrder = () => {
         FormApi.getAllOrder().then((OrdersRes) => {
             setOrders(OrdersRes);
-            setLoading(false)
+            setLoading(false);
         })
         .catch((error) => {
-            console.log(error);
+            AsyncStorage.removeItem('token');
+            AsyncStorage.removeItem('refreshToken');
+            setLoading('error');
         });
     };
     useEffect(() => {

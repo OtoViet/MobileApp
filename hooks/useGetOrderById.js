@@ -1,8 +1,6 @@
 import FormApi from '../api/formApi.js';
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 function useGetOrderById(id) {
-    const navigate = useNavigate();
     const [order, setOrder] = useState([]);
     const [loading, setLoading] = useState(true);
     const getOrder = () => {
@@ -12,7 +10,7 @@ function useGetOrderById(id) {
         })
         .catch((error) => {
             console.log(error);
-            navigate('/login');
+            setLoading('error');
         });
     };
     useEffect(() => {

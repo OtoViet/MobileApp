@@ -1,9 +1,13 @@
 import { Title, TextInput, Button, HelperText } from 'react-native-paper';
 import * as Yup from 'yup';
-import { View, Image, ScrollView } from 'react-native';
+import { View, Image, ScrollView, Alert} from 'react-native';
 import { useFormik } from 'formik';
 import Theme from '../../theme';
 import CarImage from '../../assets/car.png';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import FormApi from '../../api/formApi';
+
+
 export default function Login({ navigation }) {
     const loginSchema = Yup.object().shape({
         email: Yup.string()
@@ -19,7 +23,15 @@ export default function Login({ navigation }) {
         },
         validationSchema: loginSchema,
         onSubmit: (values) => {
-            alert(JSON.stringify(values));
+            // alert(JSON.stringify(values));
+            FormApi.login(values).then(res => {
+                // set token
+                AsyncStorage.setItem('token', res.accessToken);
+                AsyncStorage.setItem('refreshToken', res.refreshToken);
+                navigation.navigate('Home');
+            }).catch(err => {
+                Alert.alert('Thông báo', 'Có lỗi xảy ra khi đăng nhập, sai tên tài khoản hoặc mật khẩu!');
+            });
         },
     });
     return (
@@ -64,7 +76,7 @@ export default function Login({ navigation }) {
                 </HelperText>
                 <Button mode="contained"
                     color={Theme.Theme.colors.secondary}
-                    style={{marginBottom:20}}
+                    style={{ marginBottom: 20 }}
                     dark={true}
                     labelStyle={{ padding: 5 }}
                     onPress={formik.handleSubmit}>
