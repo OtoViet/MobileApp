@@ -1,9 +1,10 @@
 import FormApi from '../api/formApi.js';
 import { useState, useEffect } from 'react';
-function useGetOrderById(id) {
+function useGetOrderById(id, isFocused, isRefreshed) {
     const [order, setOrder] = useState([]);
     const [loading, setLoading] = useState(true);
     const getOrder = () => {
+        setLoading(true);
         FormApi.getOrderById(id).then((orderRes) => {
             setOrder(orderRes);
             setLoading(false)
@@ -14,8 +15,12 @@ function useGetOrderById(id) {
         });
     };
     useEffect(() => {
+        if(isRefreshed) getOrder();
+    }, [isRefreshed]);
+
+    useEffect(() => {
         getOrder();
-    }, []);
+    }, [isFocused]);
     return [loading, order];
 }
 export default useGetOrderById;

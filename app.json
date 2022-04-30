@@ -1,5 +1,18 @@
 {
   "expo": {
+    "plugins": [
+      [
+        "expo-notifications",
+        {
+          "icon": "./local/assets/notification-icon.png",
+          "color": "#ffffff",
+          "sounds": [
+            "./local/assets/notification-sound.wav",
+            "./local/assets/notification-sound-other.wav"
+          ]
+        }
+      ]
+    ],
     "name": "MobileApp",
     "slug": "MobileApp",
     "version": "1.0.0",
@@ -23,6 +36,7 @@
       "buildNumber": "3"
     },
     "android": {
+      "googleServicesFile": "./google-services.json",
       "package": "com.otoviet.googlelogin",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",

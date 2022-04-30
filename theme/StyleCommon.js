@@ -99,6 +99,50 @@ const StyleCommon = StyleSheet.create({
     },
     marginHorizontalDefault:{
         marginHorizontal: 20
+    },
+    calendar: {
+        paddingLeft: 20,
+        paddingRight: 20
+    },
+    section: {
+        backgroundColor: '#EBF9F9',
+        color: 'grey',
+        textTransform: 'capitalize'
+    },
+    item: {
+        padding: 20,
+        backgroundColor: 'white',
+        borderBottomWidth: 1,
+        borderBottomColor: 'lightgrey',
+        flexDirection: 'row'
+    },
+    itemHourText: {
+        color: 'black'
+    },
+    itemDurationText: {
+        color: 'grey',
+        fontSize: 12,
+        marginTop: 4,
+        marginLeft: 4
+    },
+    itemTitleText: {
+        color: 'black',
+        marginLeft: 16,
+        fontWeight: 'bold',
+        fontSize: 16
+    },
+    itemButtonContainer: {
+        flex: 1,
+        alignItems: 'flex-end'
+    },
+    emptyItem: {
+        paddingLeft: 20,
+        height: 52,
+        justifyContent: 'center'
+    },
+    emptyItemText: {
+        color: 'grey',
+        fontSize: 14
     }
 });
 export default StyleCommon;

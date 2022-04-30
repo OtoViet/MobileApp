@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "723803757260",
+    "project_id": "luanvan-b1f1c",
+    "storage_bucket": "luanvan-b1f1c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:723803757260:android:0de05772553d8f2a758069",
+        "android_client_info": {
+          "package_name": "com.otoviet.logingoogle"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "723803757260-jpa3nc75abqcgqg5dn5j3s1o0a38vv96.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyANFp4dfq4iPnwkh3PGL9Lw_2VN5JkBckw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "723803757260-jpa3nc75abqcgqg5dn5j3s1o0a38vv96.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "723803757260-561ep3ssnq3ip3fbo08scds8m5jt8ok0.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.otoviet.logingoogle"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

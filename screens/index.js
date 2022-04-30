@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { NavigationContainer } from '@react-navigation/native';
 import DetaiService from './Service/Detail';
@@ -8,9 +9,34 @@ import Schedule from './Schedule/Schedule';
 import Navigation from '../navigation/Drawer';
 import Theme from '../theme';
 import Detail from './Schedule/Detail';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import FormApi from '../api/formApi';
+
+async function AutoRefreshToken() {
+  console.log('goi ham refresh token');
+  let refreshToken = await AsyncStorage.getItem('refreshToken');
+  if (refreshToken) {
+    FormApi.token({ refreshToken: refreshToken })
+      .then((res) => {
+        AsyncStorage.setItem('token', res.accessToken);
+        AsyncStorage.setItem('refreshToken', res.refreshToken);
+      })
+      .catch((err) => {
+        AsyncStorage.removeItem('token');
+        AsyncStorage.removeItem('refreshToken');
+      });
+  }
+}
 const Stack = createNativeStackNavigator();
 
 export default function Screen() {
+  // const ref = useRef();
+  // useEffect(() => {
+  //   const interval = setInterval(AutoRefreshToken, 1 * 60000)
+  //   ref.current = interval
+  //   return () => clearInterval(interval)
+  // }, []);
+
   return <NavigationContainer>
     <Stack.Navigator >
       <Stack.Screen name="Drawer" options={{ headerShown: false }} component={Navigation} />

@@ -1,62 +1,144 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import Theme from '../../theme/Theme';
+import * as Device from 'expo-device';
 import { View, Alert } from 'react-native';
 import { WebView } from 'react-native-webview';
+import * as Notifications from 'expo-notifications';
 import { Headline, Title, Text, Caption, Button } from 'react-native-paper';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import FormApi from '../../api/formApi';
 import io from 'socket.io-client';
 
+Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+        shouldShowAlert: true,
+        shouldPlaySound: true,
+        shouldSetBadge: false,
+    }),
+});
 
-const wait = (timeout) => {
-    return new Promise(resolve => setTimeout(resolve, timeout));
+async function registerForPushNotificationsAsync() {
+    let token;
+    if (Device.isDevice) {
+        const { status: existingStatus } = await Notifications.getPermissionsAsync();
+        let finalStatus = existingStatus;
+        if (existingStatus !== 'granted') {
+            const { status } = await Notifications.requestPermissionsAsync();
+            finalStatus = status;
+        }
+        if (finalStatus !== 'granted') {
+            alert('Failed to get push token for push notification!');
+            return;
+        }
+        token = (await Notifications.getExpoPushTokenAsync()).data;
+        console.log(token);
+    } else {
+        alert('Must use physical device for Push Notifications');
+    }
+
+    if (Platform.OS === 'android') {
+        Notifications.setNotificationChannelAsync('default', {
+            name: 'default',
+            importance: Notifications.AndroidImportance.MAX,
+            vibrationPattern: [0, 250, 250, 250],
+            lightColor: '#FF231F7C',
+        });
+    }
+
+    return token;
 }
+
+async function sendPushNotification(expoPushToken) {
+    const message = {
+        to: expoPushToken,
+        sound: 'default',
+        title: 'Original Title',
+        body: 'And here is the body!',
+        data: { someData: 'goes here' },
+    };
+
+    await fetch('https://exp.host/--/api/v2/push/send', {
+        method: 'POST',
+        headers: {
+            Accept: 'application/json',
+            'Accept-encoding': 'gzip, deflate',
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(message),
+    });
+}
+
 
 function AfterPaymentScreen({ route, navigation }) {
     const { data } = route.params;
     const socket = io("http://192.168.1.75:5000", { transports: ['websocket', 'polling', 'flashsocket'] });
-    const handleClick = () => {
-        socket.on("connect", () => {
-            console.log(socket.id);
+
+    const [expoPushToken, setExpoPushToken] = useState('');
+    const [notification, setNotification] = useState(false);
+    const notificationListener = useRef();
+    const responseListener = useRef();
+
+    useEffect(() => {
+        registerForPushNotificationsAsync().then(token => setExpoPushToken(token));
+
+        notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
+            setNotification(notification);
         });
-        data.listServiceChoose = data.listServiceChoose.map((item, index) => {
-            return { ...item, idProduct: item._id, id: index }
+
+        responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
+            console.log(response);
         });
-        console.log(data);
-        FormApi.createOrder(data)
-            .then(resOrder => {
-                let titleNotify = "Có đơn hàng mới từ " + data.name;
-                let content = "chờ xác nhận";
-                FormApi.createNotification({
-                    title: titleNotify, content: content,
-                    from: data.email, type: "order",
-                    createdAt: resOrder.createdAt, detail: { idOrder: resOrder._id }
-                })
-                    .then(res => {
-                        socket.emit('send', {
-                            title: titleNotify, content: content,
-                            from: data.email, type: "order",
-                            createdAt: res.createdAt, detail: { idOrder: resOrder._id },
-                            isRead: false
-                        });
-                        Alert.alert('Thông báo', 'Đã gửi yêu cầu chăm sóc xe thành công!');
-                    })
-                    .catch(err => {
-                        console.log(err);
-                    });
-            })
-            .catch(err => {
-                console.log(err);
-            });
-    }
+
+        return () => {
+            Notifications.removeNotificationSubscription(notificationListener.current);
+            Notifications.removeNotificationSubscription(responseListener.current);
+        };
+    }, []);
+
+    // const handleClick = () => {
+    //     socket.on("connect", () => {
+    //         console.log(socket.id);
+    //     });
+    //     data.listServiceChoose = data.listServiceChoose.map((item, index) => {
+    //         return { ...item, idProduct: item._id, id: index }
+    //     });
+    //     console.log(data);
+    //     FormApi.createOrder(data)
+    //         .then(resOrder => {
+    //             let titleNotify = "Có đơn hàng mới từ " + data.name;
+    //             let content = "chờ xác nhận";
+    //             FormApi.createNotification({
+    //                 title: titleNotify, content: content,
+    //                 from: data.email, type: "order",
+    //                 expoPushToken: expoPushToken,
+    //                 createdAt: resOrder.createdAt, detail: { idOrder: resOrder._id }
+    //             })
+    //                 .then(res => {
+    //                     socket.emit('send', {
+    //                         title: titleNotify, content: content,
+    //                         from: data.email, type: "order",
+    //                         createdAt: res.createdAt, detail: { idOrder: resOrder._id },
+    //                         isRead: false
+    //                     });
+    //                     Alert.alert('Thông báo', 'Đã gửi yêu cầu chăm sóc xe thành công!');
+    //                     navigation.navigate('Home');
+    //                 })
+    //                 .catch(err => {
+    //                     console.log(err);
+    //                 });
+    //         })
+    //         .catch(err => {
+    //             console.log(err);
+    //         });
+    // }
     return (
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
             <Caption style={{ fontSize: 18, textAlign: 'center', marginBottom: 20 }}>
                 Vui lòng đến đúng giờ để tránh bất tiện, chúng tôi sẽ gửi cho bạn email nhắc nhở trước 1 ngày để bạn thu xếp thời gian
             </Caption>
             <Button icon="calendar-check" color={Theme.colors.secondary} mode="contained"
-                onPress={handleClick}>
+                onPress={async()=> await sendPushNotification(expoPushToken)}>
                 Xác nhận đặt lịch hẹn
             </Button>
         </View>
@@ -66,15 +148,10 @@ function VNPayScreen({ route, navigation }) {
     let { data } = route.params;
     const [openWebview, setOpenWebview] = useState(false);
     const [url, setUrl] = useState('');
-    const [refreshing, setRefreshing] = useState(false);
 
-    const onRefresh = useCallback(() => {
-        setRefreshing(true);
-        wait(2000).then(() => setRefreshing(false));
-    }, []);
     const onNavigationStateChange = (webViewState) => {
         console.log(webViewState.url);
-        if(webViewState.url.includes('localhost')) {
+        if (webViewState.url.includes('localhost')) {
             setOpenWebview(false);
             Alert.alert('Thông báo', 'Đã thanh toán thành công!');
             navigation.navigate('Home');
@@ -114,8 +191,8 @@ function VNPayScreen({ route, navigation }) {
         source={{ uri: url }} />;
     return (
 
-        <View 
-        style={{ flex: 1, justifyContent: 'center', alignItems: 'center', marginHorizontal: 20 }}>
+        <View
+            style={{ flex: 1, justifyContent: 'center', alignItems: 'center', marginHorizontal: 20 }}>
             <Title style={{ textAlign: 'center', marginBottom: 20 }}>Thanh toán trực tuyến dễ dàng với VNPAY</Title>
             <Button icon="wallet" color={Theme.colors.secondary} mode="contained"
                 onPress={handlePress}>

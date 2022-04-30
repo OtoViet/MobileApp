@@ -5,12 +5,15 @@ import Theme from '../theme';
 import { StatusBar } from 'expo-status-bar';
 import Login from '../screens/Form/Login';
 import Register from '../screens/Form/Register';
+import CalenderEmployees from '../screens/Employees/Calendar';
 import HomeScreen from '../screens/Home';
+import ForgotPassword from '../screens/Form/ForgotPassword';
 import ListStoreScreen from '../screens/ListStore/ListStore';
-import Info from '../screens/User/Info';
+import User from '../screens/User';
 import ListServiceScreen from '../screens/Service/ListService';
 import SheduleScreen from '../screens/Schedule/Schedule';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import AntDesign from 'react-native-vector-icons/AntDesign';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Entypo from 'react-native-vector-icons/Entypo';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
@@ -37,7 +40,11 @@ export default function Navigation({ route, navigation }) {
       <Drawer.Navigator initialRouteName="Home"
         drawerStyle={{
           backgroundColor: '#111',
-        }}>
+        }}
+        screenOptions={{
+          drawerActiveTintColor: Theme.Theme.colors.secondary
+        }}
+      >
         <Drawer.Screen name="Home" component={HomeScreen.screen}
           options={{
             title: 'Trang chủ',
@@ -88,7 +95,7 @@ export default function Navigation({ route, navigation }) {
             <>
               <Drawer.Screen name="Login" component={Login}
                 options={{
-                  title: 'Trang đăng nhập',
+                  title: 'Đăng nhập',
                   headerStyle: {
                     backgroundColor: Theme.Theme.colors.primary,
                   },
@@ -99,7 +106,7 @@ export default function Navigation({ route, navigation }) {
                 }} />
               <Drawer.Screen name="Register" component={Register}
                 options={{
-                  title: 'Trang đăng kí',
+                  title: 'Đăng kí',
                   headerStyle: {
                     backgroundColor: Theme.Theme.colors.primary,
                   },
@@ -108,20 +115,46 @@ export default function Navigation({ route, navigation }) {
                     <FontAwesome name="registered" size={30} color={Theme.Theme.colors.secondary} />
                   ),
                 }} />
+              <Drawer.Screen name="ForgotPassword" component={ForgotPassword}
+                options={{
+                  title: 'Quên mật khẩu',
+                  headerStyle: {
+                    backgroundColor: Theme.Theme.colors.primary,
+                  },
+                  headerTintColor: '#fff',
+                  drawerIcon: ({ focused, size }) => (
+                    <AntDesign name="questioncircleo" size={30} color={Theme.Theme.colors.secondary} />
+                  ),
+                }} />
             </>
             : null
         }
-        {token ? <Drawer.Screen name="InfoUser" component={Info}
-          options={{
-            title: 'Thông tin cá nhân',
-            headerStyle: {
-              backgroundColor: Theme.Theme.colors.primary,
-            },
-            headerTintColor: '#fff',
-            drawerIcon: ({ focused, size }) => (
-              <Ionicons name="ios-person-circle" size={30} color={Theme.Theme.colors.secondary} />
-            ),
-          }} /> : null}
+        {token ?
+          <>
+            <Drawer.Screen name="User" component={User}
+              options={{
+                title: 'Người dùng',
+                headerStyle: {
+                  backgroundColor: Theme.Theme.colors.primary,
+                },
+                headerTintColor: '#fff',
+                drawerIcon: ({ focused, size }) => (
+                  <Ionicons name="ios-person-circle" size={30} color={Theme.Theme.colors.secondary} />
+                ),
+              }} />
+            <Drawer.Screen name="CalenderEmployees" component={CalenderEmployees}
+              options={{
+                title: 'Lịch làm việc',
+                headerStyle: {
+                  backgroundColor: Theme.Theme.colors.primary,
+                },
+                headerTintColor: '#fff',
+                drawerIcon: ({ focused, size }) => (
+                  <Ionicons name="calendar-sharp" size={30} color={Theme.Theme.colors.secondary} />
+                ),
+              }} />
+          </>
+          : null}
       </Drawer.Navigator>
     </>
   );

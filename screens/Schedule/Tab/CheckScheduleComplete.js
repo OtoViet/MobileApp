@@ -3,14 +3,10 @@ import 'moment/locale/vi';
 import { useState, useEffect } from 'react';
 import Theme from '../../../theme/Theme';
 import Loading from '../../../components/Loading';
-import FormApi from '../../../api/formApi';
 import { ScrollView, View, Alert } from 'react-native';
 import { Table, Row } from 'react-native-table-component';
 import useGetAllScheduleHistory from '../../../hooks/useGetAllScheduleHistory';
 import { Button, Headline } from 'react-native-paper';
-import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
-
-const Tab = createMaterialTopTabNavigator();
 
 const Booking = ({ route, navigation }) => {
     const tableHead = ['Mã lịch hẹn', 'Ngày đặt', 'Thời gian hẹn', 'Trạng thái', 'Chi tiết'];

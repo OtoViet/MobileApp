@@ -54,6 +54,7 @@ export default function Login({ navigation }) {
                     style={Theme.StyleCommon.TextInput}
                     name="email"
                     label="Email"
+                    keyboardType="email-address"
                     mode="outlined"
                     value={formik.values.email}
                     onBlur={formik.handleBlur('email')}

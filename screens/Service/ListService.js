@@ -1,12 +1,15 @@
-import { View, FlatList, StyleSheet } from 'react-native';
+import { useState, useCallback, useEffect } from 'react';
+import { View, FlatList, StyleSheet, RefreshControl } from 'react-native';
 import { Card, Title, Paragraph, Button } from 'react-native-paper';
 import StyleCommon from '../../theme/StyleCommon';
 import Theme from '../../theme/Theme';
 import useGetAllProduct from '../../hooks/useGetAllProduct';
 import Loading from '../../components/Loading';
+import { useIsFocused } from '@react-navigation/native';
 
-const handlePressDetail = (navigation,itemData)=>{
-    navigation.navigate('Details',{
+
+const handlePressDetail = (navigation, itemData) => {
+    navigation.navigate('Details', {
         data: itemData
     });
 }
@@ -34,14 +37,27 @@ const Item = ({ itemData, navigation }) => (
             </Card.Content>
             <Card.Actions>
                 <Button style={StyleCommon.ButtonCenter}
-                onPress={() => handlePressDetail(navigation,itemData)}
-                labelStyle={{color: Theme.colors.secondary}}>Xem thêm</Button>
+                    onPress={() => handlePressDetail(navigation, itemData)}
+                    labelStyle={{ color: Theme.colors.secondary }}>Xem thêm</Button>
             </Card.Actions>
         </Card>
     </View>
 );
-export default function ListServiceScreen({navigation}) {
-    const [loading, products] = useGetAllProduct();
+
+export default function ListServiceScreen({ navigation }) {
+    const isFocused = useIsFocused();
+    const [refreshing, setRefreshing] = useState(false);
+    const [loading, products] = useGetAllProduct(isFocused, refreshing);
+    const onRefresh = useCallback(() => {
+        setRefreshing(true);
+    }, []);
+
+    useEffect(() => {
+        if(!loading) {
+            setRefreshing(false);
+        }
+    }, [loading]);
+
     const renderItem = ({ item }) => (
         <Item itemData={item} navigation={navigation} />
     );
@@ -49,6 +65,12 @@ export default function ListServiceScreen({navigation}) {
     return (
         <View>
             <FlatList
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={onRefresh}
+                    />
+                }
                 data={products}
                 renderItem={renderItem}
                 keyExtractor={item => item._id}

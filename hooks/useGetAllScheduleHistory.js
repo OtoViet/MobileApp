@@ -1,10 +1,11 @@
 import FormApi from '../api/formApi.js';
 import { useState, useEffect } from 'react';
 
-function useGetAllScheduleHistory() {
+function useGetAllScheduleHistory(isFocused, isRefreshed) {
     const [scheduleHistory, setScheduleHistory] = useState([]);
     const [loading, setLoading] = useState(true);
     const getListScheduleHistory = () => {
+        setLoading(true);
         FormApi.getAllScheduleHistory().then((scheduleHistoryRes) => {
             setScheduleHistory(scheduleHistoryRes);
             setLoading(false)
@@ -14,8 +15,13 @@ function useGetAllScheduleHistory() {
         });
     };
     useEffect(() => {
+        if(isRefreshed) getListScheduleHistory();
+    }, [isRefreshed]);
+
+    useEffect(() => {
         getListScheduleHistory();
-    }, []);
+    }, [isFocused]);
+    
     return [loading, scheduleHistory];
 }
 export default useGetAllScheduleHistory;

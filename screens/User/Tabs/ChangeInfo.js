@@ -3,15 +3,15 @@ import * as Yup from 'yup';
 import { useEffect, useState } from 'react';
 import { View, ScrollView, Alert, TouchableOpacity } from 'react-native';
 import { useFormik } from 'formik';
-import Theme from '../../theme';
+import Theme from '../../../theme';
 import moment from 'moment';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import FormApi from '../../api/formApi';
-import useGetInfoCustomer from '../../hooks/useGetInfoCustomer';
-import Loading from '../../components/Loading';
+import FormApi from '../../../api/formApi';
+import useGetInfoCustomer from '../../../hooks/useGetInfoCustomer';
+import Loading from '../../../components/Loading';
 
-export default function Login({ navigation }) {
+export default function ChangeInfo({ navigation }) {
     const [loading, infoCustomer] = useGetInfoCustomer();
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
     const [valueDateShow, setValueDateShow] = useState(null);
