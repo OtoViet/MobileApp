@@ -12,12 +12,15 @@ import VacuumCleaner from '../../components/Svg/vacuumCleaner';
 import SeatCar from '../../components/Svg/seatCar';
 import CounterUp from '../../components/CounterUp';
 import Card from '../../components/Card';
-import Employees from '../../assets/team-1.jpg';
-import Employees1 from '../../assets/team-2.jpg';
-import Employees2 from '../../assets/team-3.jpg';
+import Theme from '../../theme/Theme';
+import useGetAllEmployee from '../../hooks/useGetAllEmployee';
+import Loading from '../../components/Loading';
 
 export default function HomeScreen({ route, navigation }) {
   // const data = route.params;
+  const [loading, employees] = useGetAllEmployee();
+
+  if (loading) return <Loading.Origin color={Theme.colors.secondary} size={50} />;
   return (
     <ScrollView>
       <View style={StyleCommon.FlexCenter}>
@@ -97,9 +100,11 @@ export default function HomeScreen({ route, navigation }) {
 
         <Headline style={{ marginTop: 20, marginBottom: 10 }}>DANH SÁCH NHÂN VIÊN</Headline>
       </View>
-      <Card.Origin srcImage={Employees} title="Huỳnh Thanh Phong"/>
-      <Card.Origin srcImage={Employees1} title="Trần Văn Nhẫn"/>
-      <Card.Origin srcImage={Employees2} title="Nguyễn Thiện Hải"/>
+      {
+        employees.map((employee, index) => (
+          <Card.Origin key={index} srcImage={{uri:employee.image}} title={employee.fullName} />
+        ))
+      }
       <View style={StyleCommon.FlexCenter}>
         <Headline style={{ marginTop: 50, marginBottom: 10 }}>KHÁCH HÀNG ĐÃ NÓI GÌ?</Headline>
         <CarouselCustomerSaid />

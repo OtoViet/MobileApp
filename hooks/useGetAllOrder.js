@@ -14,6 +14,7 @@ function useGetAllOrder(isFocused, isRefreshed) {
         .catch((error) => {
             AsyncStorage.removeItem('token');
             AsyncStorage.removeItem('refreshToken');
+            AsyncStorage.removeItem('role');
             setLoading('error');
         });
     };

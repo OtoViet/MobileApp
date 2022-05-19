@@ -83,6 +83,10 @@ const formApi={
         const url ='/order/getAllOrder';
         return axiosClient.get(url);
     },
+    getAllOrderForEmployee: function(){
+        const url ='/order/getAllOrderForEmployee';
+        return axiosClient.get(url);
+    },
     findOrderByEmail: function(email){
         const url ='/order/findOrderByEmail/'+email;
         return axiosClient.get(url);
@@ -93,6 +97,10 @@ const formApi={
     },
     cancelOrder: function(id){
         const url ='/order/cancelOrder/'+id;
+        return axiosClient.patch(url);
+    },
+    updatePayStatuslOrder: function(id){
+        const url ='/order/updatePayStatuslOrder/'+id;
         return axiosClient.patch(url);
     },
     getAllStore: function(){

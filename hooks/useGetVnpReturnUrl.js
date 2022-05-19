@@ -1,5 +1,6 @@
 import FormApi from '../api/formApi.js';
 import { useState, useEffect } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 function useGetVnpReturnUrl(params, isFocused, isRefreshed) {
     const [data, setData] = useState([]);
@@ -11,22 +12,22 @@ function useGetVnpReturnUrl(params, isFocused, isRefreshed) {
             setLoading(false)
         })
         .catch((error) => {
-            FormApi.token({ refreshToken: localStorage.getItem('refreshToken') })
+            FormApi.token({ refreshToken: AsyncStorage.getItem('refreshToken') })
             .then((res) => {
-                localStorage.setItem('token', res.accessToken);
-                localStorage.setItem('refreshToken', res.refreshToken);
+                AsyncStorage.setItem('token', res.accessToken);
+                AsyncStorage.setItem('refreshToken', res.refreshToken);
                 FormApi.getVnpUrlReturn().then((dataRes) => {
                     setData(dataRes);
                     setLoading(false)
                 })
                 .catch((error) => {
                     console.log(error);
-                    window.location.href = '/';
+                    setLoading('error');
                 });
             })
             .catch((error) => {
-                console.log(error);
-                window.location.href = '/';
+                    setLoading('error');
+                    console.log(error);
             });
         });
     };

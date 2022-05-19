@@ -1,15 +1,15 @@
-import { Title, TextInput, Button, HelperText } from 'react-native-paper';
 import * as Yup from 'yup';
-import { useEffect, useState } from 'react';
-import { View, ScrollView, Alert, TouchableOpacity } from 'react-native';
-import { useFormik } from 'formik';
-import Theme from '../../../theme';
 import moment from 'moment';
-import DateTimePickerModal from "react-native-modal-datetime-picker";
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Theme from '../../../theme';
+import { useFormik } from 'formik';
 import FormApi from '../../../api/formApi';
-import useGetInfoCustomer from '../../../hooks/useGetInfoCustomer';
+import { useEffect, useState } from 'react';
 import Loading from '../../../components/Loading';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import useGetInfoCustomer from '../../../hooks/useGetInfoCustomer';
+import DateTimePickerModal from "react-native-modal-datetime-picker";
+import { View, ScrollView, Alert, TouchableOpacity } from 'react-native';
+import { Title, TextInput, Button, HelperText } from 'react-native-paper';
 
 export default function ChangeInfo({ navigation }) {
     const [loading, infoCustomer] = useGetInfoCustomer();
@@ -71,7 +71,7 @@ export default function ChangeInfo({ navigation }) {
     return (
         <ScrollView>
             <View style={Theme.StyleCommon.Form}>
-                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', marginVertical:20 }}>
                     <Ionicons name="information-circle" size={50} color={Theme.Theme.colors.secondary} />
                     <Title style={{ textAlign: 'center', fontSize: 28 }}>
                         Thông tin tài khoản

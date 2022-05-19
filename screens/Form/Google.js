@@ -3,7 +3,8 @@ import * as WebBrowser from 'expo-web-browser';
 import * as Google from 'expo-auth-session/providers/google';
 import { View } from 'react-native';
 import { Button } from 'react-native-paper';
-
+import FormApi from '../../api/formApi';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 WebBrowser.maybeCompleteAuthSession();
 
 export default function GoogleLogin(props) {
@@ -21,14 +22,28 @@ export default function GoogleLogin(props) {
       setAccessToken(response.authentication.accessToken);
     }
   }, [response]);
-
+  console.log(accessToken);
+  if(accessToken) redirectToHome();
   async function redirectToHome() {
     let userInfoResponse = await fetch("https://www.googleapis.com/userinfo/v2/me", {
       headers: { Authorization: `Bearer ${accessToken}` }
     });
 
     userInfoResponse.json().then(data => {
+      let dataSend = {
+        firstName: data.given_name,
+        lastName: data.family_name,
+        email: data.email,
+        // image: data.picture,
+        fullName: data.name
+      }
+      FormApi.loginGoogle({ data: dataSend });
+      AsyncStorage.setItem('token', accessToken);
+      AsyncStorage.setItem('refreshToken', accessToken);
       props.redirect('Home', data);
+    }).catch(err => { 
+      console.log(err);
+      props.redirect('Home', {});
     });
   }
   return (

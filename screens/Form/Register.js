@@ -1,14 +1,31 @@
 import moment from 'moment';
 import * as Yup from 'yup';
-import { useState } from 'react';
 import Theme from '../../theme';
+import { useState } from 'react';
 import { useFormik } from 'formik';
 import GoogleLogin from './Google';
+import { Alert } from 'react-native';
 import FormApi from '../../api/formApi';
 import CarImage from '../../assets/car.png';
 import { View, Image, ScrollView, TouchableOpacity } from 'react-native';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { Title, TextInput, Button, HelperText } from 'react-native-paper';
+
+function CheckEmail(value) {
+    return new Promise((resolve, reject) => {
+        FormApi.existAccount({ email: value }).then(res => {
+            if (res.exist) {
+                resolve(false);
+            } else {
+                resolve(true);
+            }
+        })
+            .catch(err => {
+                console.log(err);
+                reject(err);
+            });
+    })
+}
 
 export default function Register({ navigation }) {
     const [data, setData] = useState(null);
@@ -39,21 +56,7 @@ export default function Register({ navigation }) {
             .max(50, 'Quá dài!')
             .required('Vui lòng nhập tên của bạn')
             .test('Unique Email', 'Email đã tồn tại', // <- key, message
-                function (value) {
-                    return new Promise((resolve, reject) => {
-                        FormApi.existAccount({ email: value }).then(res => {
-                            if (res.exist) {
-                                resolve(false);
-                            } else {
-                                resolve(true);
-                            }
-                        })
-                            .catch(err => {
-                                console.log(err);
-                                reject(err);
-                            });
-                    })
-                }
+                CheckEmail
             ),
         password: Yup.string().required('Vui lòng nhập mật khẩu').min(6, 'Mật khẩu phải có ít nhất 6 ký tự'),
         rePassword: Yup.string().required('Vui lòng nhập lại mật khẩu').oneOf([Yup.ref('password')], 'Mật khẩu không trùng khớp'),
@@ -75,7 +78,17 @@ export default function Register({ navigation }) {
         },
         validationSchema: registerSchema,
         onSubmit: (values) => {
-            alert(JSON.stringify(values));
+            // alert(JSON.stringify(values));
+            const signUpFormData = values;
+            FormApi.signUp(signUpFormData).then(res => {
+                console.log(res);
+                Alert.alert('Thông báo', 'Đăng ký tài khoản mới thành công, đăng nhập để sử dụng!');
+                navigation.navigate('Login');
+                
+            }).catch(err => {
+                console.log(err);
+                Alert.alert('Thông báo', 'Đăng ký tài khoản mới thất bại!');
+            });
         },
     });
     return (
@@ -113,6 +126,7 @@ export default function Register({ navigation }) {
                     label="Tên"
                     mode="outlined"
                     value={formik.values.firstName}
+                    onBlur={formik.handleBlur('firstName')}
                     onChangeText={(text) => formik.setFieldValue('firstName', text)}
                 />
                 <HelperText type="error" visible={formik.touched.firstName && Boolean(formik.errors.firstName)}>
@@ -165,7 +179,7 @@ export default function Register({ navigation }) {
                     keyboardType="email-address"
                     mode="outlined"
                     value={formik.values.email}
-                    onBlur={formik.handleBlur('email')}
+                    // onBlur={formik.handleBlur('email')}
                     onChangeText={(text) => formik.setFieldValue('email', text)}
                 />
                 <HelperText type="error" visible={formik.touched.email && Boolean(formik.errors.email)}>

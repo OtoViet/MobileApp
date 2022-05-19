@@ -1,14 +1,15 @@
 import FormApi from '../api/formApi.js';
 import { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-function useGetInfoCustomer(isFocused, isRefreshed) {
-    const [info, setInfo] = useState({});
+
+function useGetAllOrderForEmployee(isFocused, isRefreshed) {
+    const [Orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
-    const getInfoCustomer = () => {
+    const getListOrder = () => {
         setLoading(true);
-        FormApi.getInfoCustomer().then((infoRes) => {
-            setInfo(infoRes);
-            setLoading(false)
+        FormApi.getAllOrderForEmployee().then((OrdersRes) => {
+            setOrders(OrdersRes);
+            setLoading(false);
         })
         .catch((error) => {
             AsyncStorage.removeItem('token');
@@ -18,13 +19,13 @@ function useGetInfoCustomer(isFocused, isRefreshed) {
         });
     };
     useEffect(() => {
-        if(isRefreshed) getInfoCustomer();
+        if(isRefreshed) getListOrder();
     }, [isRefreshed]);
 
     useEffect(() => {
-        getInfoCustomer();
+        getListOrder();
     }, [isFocused]);
     
-    return [loading, info];
+    return [loading, Orders];
 }
-export default useGetInfoCustomer;
+export default useGetAllOrderForEmployee;

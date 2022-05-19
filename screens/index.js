@@ -1,4 +1,3 @@
-import { useEffect, useRef } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { NavigationContainer } from '@react-navigation/native';
 import DetaiService from './Service/Detail';
@@ -9,8 +8,12 @@ import Schedule from './Schedule/Schedule';
 import Navigation from '../navigation/Drawer';
 import Theme from '../theme';
 import Detail from './Schedule/Detail';
+import VnPayReturn from './Service/VnPayResult';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import FormApi from '../api/formApi';
+import useNotification from '../hooks/useNotification';
+import Notification from './Employees/Notification';
+import { navigationRef } from "../navigation/RootNavigation";
 
 async function AutoRefreshToken() {
   console.log('goi ham refresh token');
@@ -28,7 +31,6 @@ async function AutoRefreshToken() {
   }
 }
 const Stack = createNativeStackNavigator();
-
 export default function Screen() {
   // const ref = useRef();
   // useEffect(() => {
@@ -36,10 +38,11 @@ export default function Screen() {
   //   ref.current = interval
   //   return () => clearInterval(interval)
   // }, []);
-
-  return <NavigationContainer>
+  useNotification();
+  return <NavigationContainer ref={navigationRef}>
     <Stack.Navigator >
-      <Stack.Screen name="Drawer" options={{ headerShown: false }} component={Navigation} />
+      <Stack.Screen name="Drawer" options={{ headerShown: false }}
+        component={Navigation} />
       <Stack.Screen name="Details" component={DetaiService}
         options={{
           title: "Chi tiết dịch vụ",
@@ -83,6 +86,22 @@ export default function Screen() {
       <Stack.Screen name="DetailOrder" component={Detail}
         options={{
           title: "Chi tiết lịch hẹn",
+          headerStyle: {
+            backgroundColor: Theme.Theme.colors.primary,
+          },
+          headerTintColor: '#fff',
+        }} />
+      <Stack.Screen name="VnPayReturn" component={VnPayReturn}
+        options={{
+          title: "Kết quả thanh toán",
+          headerStyle: {
+            backgroundColor: Theme.Theme.colors.primary,
+          },
+          headerTintColor: '#fff',
+        }} />
+      <Stack.Screen name="Notification" component={Notification}
+        options={{
+          title: "Thông báo",
           headerStyle: {
             backgroundColor: Theme.Theme.colors.primary,
           },

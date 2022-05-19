@@ -1,30 +1,36 @@
 import moment from 'moment';
 import 'moment/locale/vi';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Theme from '../../../theme/Theme';
 import { Searchbar as SearchBarPaper } from 'react-native-paper';
 import Loading from '../../../components/Loading';
 import FormApi from '../../../api/formApi';
-import { ScrollView, View, Alert } from 'react-native';
+import { ScrollView, View, Alert, RefreshControl } from 'react-native';
 import { Table, Row } from 'react-native-table-component';
 import useGetAllOrder from '../../../hooks/useGetAllOrder';
 import { Button, Headline } from 'react-native-paper';
-import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
+import { useIsFocused } from '@react-navigation/native';
 
-const Tab = createMaterialTopTabNavigator();
-
-const Booking = ({ route, navigation }) => {
+const Schedule = ({ route, navigation }) => {
+    const isFocused = useIsFocused();
+    const [refreshing, setRefreshing] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const onChangeSearch = query => setSearchQuery(query);
     const tableHead = ['Mã lịch hẹn', 'Ngày đặt', 'Thời gian hẹn', 'Chi tiết'];
     const widthArr = [200, 100, 200, 120];
     let tableData = [];
-    const [loadingOrder, orders] = useGetAllOrder();
+    const [loadingOrder, orders] = useGetAllOrder(isFocused, refreshing);
     const [dataTable1, setDataTable1] = useState(null);
 
+    const onRefresh = useCallback(() => {
+        setRefreshing(true);
+    }, []);
 
-    console.log(loadingOrder);
-
+    useEffect(() => {
+        if (!loadingOrder) {
+            setRefreshing(false);
+        }
+    }, [loadingOrder]);
     useEffect(() => {
         orders.forEach((item, index) => {
             tableData.push([
@@ -41,7 +47,7 @@ const Booking = ({ route, navigation }) => {
     }, [loadingOrder]);
     const handlePressFind = () => {
         if (searchQuery == '') {
-            Alert.alert('Thông báo','Bạn chưa nhập mã lịch hẹn');
+            Alert.alert('Thông báo', 'Bạn chưa nhập mã lịch hẹn');
             tableData = [];
             orders.forEach((item, index) => {
                 tableData.push([
@@ -55,7 +61,7 @@ const Booking = ({ route, navigation }) => {
             });
             setDataTable1(tableData);
         }
-        else{
+        else {
             FormApi.findOrderByEmail(searchQuery)
                 .then(res => {
                     if (res.length > 0) {
@@ -86,7 +92,14 @@ const Booking = ({ route, navigation }) => {
     }
     if (loadingOrder) return <Loading.Origin color={Theme.colors.secondary} size={50} />;
     return (
-        <ScrollView >
+        <ScrollView
+            refreshControl={
+                <RefreshControl
+                    refreshing={refreshing}
+                    onRefresh={onRefresh}
+                />
+            }
+        >
             <Headline style={{ textAlign: 'center', marginVertical: 20 }}>Danh sách lịch hẹn</Headline>
             <SearchBarPaper
                 placeholder="Nhập email đặt lịch"
@@ -124,4 +137,4 @@ const Booking = ({ route, navigation }) => {
     );
 }
 
-export default Booking;
+export default Schedule;

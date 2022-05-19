@@ -1,13 +1,14 @@
 import * as Yup from 'yup';
-import { useState } from 'react';
 import Theme from '../../../theme';
 import { useFormik } from 'formik';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { Alert } from 'react-native';
 import FormApi from '../../../api/formApi';
 import { View, ScrollView } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Title, TextInput, Button, HelperText } from 'react-native-paper';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
-export default function Register({ navigation }) {
+export default function ChangePassword({ navigation }) {
     const changePasswordSchema = Yup.object().shape({
         currentPassword: Yup.string().required('Vui lòng nhập mật khẩu hiện tại'),
         password: Yup.string().required('Vui lòng nhập mật khẩu').min(6, 'Mật khẩu phải có ít nhất 6 ký tự'),
@@ -21,13 +22,23 @@ export default function Register({ navigation }) {
         },
         validationSchema: changePasswordSchema,
         onSubmit: (values) => {
-            alert(JSON.stringify(values));
+            FormApi.changePassword(values).then(res => {
+                if (res) {
+                    Alert.alert('Thông báo', 'Đổi mật khẩu thành công. Đăng nhập lại để tiếp tục!');
+                    AsyncStorage.removeItem('token');   
+                    AsyncStorage.removeItem('refreshToken');
+                    AsyncStorage.removeItem('role');
+                    navigation.navigate('Home');
+                }
+            }).catch(err => {
+                Alert.alert('Thông báo', 'Có lỗi xảy ra khi thay đổi mật khẩu, vui lòng thử lại sau!');
+            });
         },
     });
     return (
         <ScrollView>
             <View style={Theme.StyleCommon.Form}>
-                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', marginVertical:20 }}>
                     <MaterialCommunityIcons name="account-key" size={50} color={Theme.Theme.colors.secondary} />
                     <Title style={{ textAlign: 'center', fontSize: 28 }}>
                         Thay đổi mật khẩu

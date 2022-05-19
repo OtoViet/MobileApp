@@ -1,18 +1,37 @@
-import * as React from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import MapView, { Marker, Callout } from 'react-native-maps';
 import { Headline, Text, Title } from 'react-native-paper';
-import { StyleSheet, View, Dimensions, ScrollView } from 'react-native';
+import { StyleSheet, View, Dimensions, ScrollView, RefreshControl } from 'react-native';
 import useGetAllStore from '../../hooks/useGetAllStore';
 import Loading from '../../components/Loading';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import Theme from '../../theme/Theme';
+import { useIsFocused } from '@react-navigation/native';
 
 export default function ListStore() {
-    const [loading, stores] = useGetAllStore();
+    const isFocused = useIsFocused();
+    const [refreshing, setRefreshing] = useState(false);
+    const [loading, stores] = useGetAllStore(isFocused, refreshing);
+    const onRefresh = useCallback(() => {
+        setRefreshing(true);
+    }, []);
+    useEffect(() => {
+        if (!loading) {
+            setRefreshing(false);
+        }
+    }, [loading]);
+
     if (loading) return <Loading.Origin color={Theme.colors.secondary} size={50} />;
     return (
-        <ScrollView>
-            <Headline style={{ textAlign: 'center', marginVertical: 20}}>
+        <ScrollView
+            refreshControl={
+                <RefreshControl
+                    refreshing={refreshing}
+                    onRefresh={onRefresh}
+                />
+            }
+        >
+            <Headline style={{ textAlign: 'center', marginVertical: 20 }}>
                 Địa Chỉ Cửa Hàng OtoViet
             </Headline>
             {
@@ -32,7 +51,7 @@ export default function ListStore() {
                 })
             }
             <View style={styles.container}>
-                <Headline style={{ textAlign: 'center', marginBottom:20, marginTop:40 }}>
+                <Headline style={{ textAlign: 'center', marginBottom: 20, marginTop: 40 }}>
                     Danh Sách Và Địa Chỉ Chi Tiết
                 </Headline>
                 <MapView style={styles.map}

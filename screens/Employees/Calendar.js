@@ -1,197 +1,101 @@
-import isEmpty from 'lodash/isEmpty';
-import React, { useCallback, useState } from 'react';
-import { Alert, View, Text, TouchableOpacity, Button } from 'react-native';
-import { ExpandableCalendar, AgendaList, CalendarProvider } from 'react-native-calendars';
-import StyleCommon from '../../theme/StyleCommon';
-import './configLocaleVi';
+import moment from 'moment';
+import 'moment/locale/vi';
+import { useState, useEffect } from 'react';
+import { Caption, Title, Button } from 'react-native-paper';
+import { View, Text, FlatList, Dimensions, Alert } from 'react-native';
+import CalendarStrip from 'react-native-calendar-strip';
+import useGetAllOrderForEmployee from '../../hooks/useGetAllOrderForEmployee';
+import Loading from '../../components/Loading';
+import Theme from '../../theme/Theme';
+import { useIsFocused } from '@react-navigation/native';
 
-const today = new Date().toISOString().split('T')[0];
-const fastDate = getPastDate(3);
-const futureDates = getFutureDates(9);
-const dates = [fastDate, today].concat(futureDates);
+let markedDates = [];
 
-function getFutureDates(numberOfDays) {
-    const array = [];
-    for (let index = 1; index <= numberOfDays; index++) {
-        const date = new Date(Date.now() + 864e5 * index); // 864e5 == 86400000 == 24*60*60*1000
-        const dateString = date.toISOString().split('T')[0];
-        array.push(dateString);
-    }
-    return array;
-}
+const handlePress = (data) => {
+    Alert.alert('Chi tiết',
+        `Khách hàng: ${data.item.contactInfo.name}\nĐịa chỉ: ${data.item.contactInfo.address}\nSố điện thoại: ${data.item.contactInfo.phoneNumber}\nThời gian hẹn: ${moment(data.item.dateAppointment).format('LLLL')}\nDịch vụ đã chọn: ${data.item.listService.map(item => item.productName).join(', ')}\nCombo đã chọn: ${data.item.combo}`);
+};
+const Item = ({ data }) => (
+    <View style={{
+        backgroundColor: 'white',
+        padding: 20,
+        marginVertical: 4,
+    }}>
+        <Caption style={{ fontWeight: 'bold' }}>{moment(new Date(data.item.dateAppointment)).format("dddd, DD MMMM YYYY").replace(/(^\w{1})|(\s+\w{1})/g, letter => letter.toUpperCase())}</Caption>
+        <Text>Thời gian hẹn: {moment(data.item.dateAppointment).format('HH:mm')}</Text>
+        <Title style={{ fontSize: 18 }}>KH. {data.item.contactInfo.name}</Title>
+        <Button color="red" mode="contained"
+            onPress={() => handlePress(data)}>
+            Chi tiết
+        </Button>
+    </View>
+);
 
-function getPastDate(numberOfDays) {
-    return new Date(Date.now() - 864e5 * numberOfDays).toISOString().split('T')[0];
-}
+export default function EmployeeCalendar() {
+    const isFocused = useIsFocused();
+    const [loading, ordersGet] = useGetAllOrderForEmployee(isFocused, );
+    const [orders, setOrders] = useState([]);
+    const [selectedDate, setSelectedDate] = useState(new Date());
 
-const ITEMS = [
-    {
-        id: 1,
-        title: dates[0],
-        data: [{ hour: '12am', duration: '1h', title: 'First Yoga' }]
-    },
-    {
-        id: 2,
-        title: dates[1],
-        data: [
-            { hour: '4pm', duration: '1h', title: 'Pilates ABC' },
-            { hour: '5pm', duration: '1h', title: 'Vinyasa Yoga' }
-        ]
-    },
-    {
-        id: 3,
-        title: dates[2],
-        data: [
-            { hour: '1pm', duration: '1h', title: 'Ashtanga Yoga' },
-            { hour: '2pm', duration: '1h', title: 'Deep Stretches' },
-            { hour: '3pm', duration: '1h', title: 'Private Yoga' }
-        ]
-    },
-    {
-        id: 4,
-        title: dates[3],
-        data: [{ hour: '12am', duration: '1h', title: 'Ashtanga Yoga' }]
-    },
-    {
-        id: 5,
-        title: dates[4],
-        data: [{}]
-    },
-    {
-        id: 6,
-        title: dates[5],
-        data: [
-            { hour: '9pm', duration: '1h', title: 'Middle Yoga' },
-            { hour: '10pm', duration: '1h', title: 'Ashtanga' },
-            { hour: '11pm', duration: '1h', title: 'TRX' },
-            { hour: '12pm', duration: '1h', title: 'Running Group' }
-        ]
-    },
-    {
-        id: 7,
-        title: dates[6],
-        data: [
-            { hour: '12am', duration: '1h', title: 'Ashtanga Yoga' }
-        ]
-    },
-    {
-        id: 8,
-        title: dates[7],
-        data: [{}]
-    },
-    {
-        id: 9,
-        title: dates[8],
-        data: [
-            { hour: '9pm', duration: '1h', title: 'Pilates Reformer' },
-            { hour: '10pm', duration: '1h', title: 'Ashtanga' },
-            { hour: '11pm', duration: '1h', title: 'TRX' },
-            { hour: '12pm', duration: '1h', title: 'Running Group' }
-        ]
-    },
-    {
-        id: 10,
-        title: dates[9],
-        data: [
-            { hour: '1pm', duration: '1h', title: 'Ashtanga Yoga' },
-            { hour: '2pm', duration: '1h', title: 'Deep Stretches' },
-            { hour: '3pm', duration: '1h', title: 'Private Yoga' }
-        ]
-    },
-    {
-        id: 11,
-        title: dates[10],
-        data: [
-            { hour: '12am', duration: '1h', title: 'Last Yoga' }
-        ]
-    }
-];
-
-function getMarkedDates(items) {
-    const marked = {};
-    items.forEach(item => {
-        // NOTE: only mark dates with data
-        if (item.data && item.data.length > 0 && !isEmpty(item.data[0])) {
-            marked[item.title] = { marked: true };
-        } else {
-            marked[item.title] = { disabled: true };
-        }
-    });
-    return marked;
-}
-
-const AgendaItem = React.memo(function AgendaItem(props) {
-    const { item } = props;
-
-    const buttonPressed = useCallback(() => {
-        Alert.alert('Tiêu đề', 'Show me more');
-    }, []);
-
-    const itemPressed = useCallback(() => {
-        Alert.alert(item.title);
-    }, []);
-
-    if (isEmpty(item)) {
-        return (
-            <View style={StyleCommon.emptyItem}>
-                <Text style={StyleCommon.emptyItemText}>Không có lịch làm việc</Text>
-            </View>
-        );
-    }
-
-    return (
-        <TouchableOpacity onPress={itemPressed} style={StyleCommon.item} /*testID={testIDs.agenda.ITEM}*/>
-            <View>
-                <Text style={StyleCommon.itemHourText}>{item.hour}</Text>
-                <Text style={StyleCommon.itemDurationText}>{item.duration}</Text>
-            </View>
-            <Text style={StyleCommon.itemTitleText}>{item.title}</Text>
-            <View style={StyleCommon.itemButtonContainer}>
-                <Button color={'red'} title={'Chi tiết'} onPress={buttonPressed} />
-            </View>
-        </TouchableOpacity>
+    useEffect(() => {
+        markedDates = [];
+        ordersGet.forEach(order => {
+            let dots = [];
+            let momentDate = moment(order.dateAppointment);
+            dots.push({
+                color: '#00bfff',
+                selectedColor: 'yellow',
+            });
+            markedDates.push({
+                date: momentDate,
+                dots
+            });
+        });
+        if (!loading) setOrders(ordersGet.filter(order => moment().isSame(moment(order.dateAppointment), 'day')));
+    }, [ordersGet]);
+    const renderItem = (props) => (
+        <Item data={props} />
     );
-});
-
-let marked = getMarkedDates(ITEMS);
-console.log('change marked day');
-export default function ExpandableCalendarScreen() {
-    const renderItem = useCallback(({ item, index }) => {
-        console.log('loading');
-        return <AgendaItem key={index} item={item} />;
-    },[]);
+    // const datesBlacklistFunc = date => {
+    //     return date.isoWeekday() === 7; // disable Saturdays
+    // }
+    const onDateSelected = selectedDate => {
+        let ordersFilter = ordersGet.filter(order => selectedDate.isSame(moment(order.dateAppointment), 'day'));
+        setOrders(ordersFilter);
+        setSelectedDate(selectedDate);
+    }
+    if (loading) return <Loading.Origin color={Theme.colors.secondary} size={50} />;
 
     return (
-        <CalendarProvider
-            date={ITEMS[1].title}
-            showTodayButton={false}
-            disabledOpacity={0.6}
+        <View
         >
-            <ExpandableCalendar
-                firstDay={1}
-                disablePan={true}
-                hideKnob={true}
-                disableWeekScroll={true}
-                markedDates={marked}
-                disableAllTouchEventsForInactiveDays={true}
-                disableAllTouchEventsForDisabledDays={true}
-                disableArrowLeft={true}
-                disableArrowRight={true}
-                hideArrows={true}
-                enableSwipeMonths={false}
-                disableMonthChange={true}
-                showSixWeeks={false}
-                displayLoadingIndicator={true}
+            <CalendarStrip
+                scrollable={false}
+                calendarAnimation={{ type: 'parallel', duration: 300 }}
+                daySelectionAnimation={{
+                    type: 'border', borderWidth: 2,
+                    duration: 200, borderHighlightColor: 'orange'
+                }}
+                style={{ height: 120, paddingTop: 10, paddingBottom: 10 }}
+                calendarHeaderStyle={{ color: 'black', textTransform: 'uppercase' }}
+                calendarColor={'white'}
+                dateNumberStyle={{ color: 'black' }}
+                dateNameStyle={{ color: 'black' }}
+                iconContainer={{ flex: 0.1 }}
+                highlightDateNameStyle={{ color: 'yellow' }}
+                highlightDateNumberStyle={{ color: 'yellow' }}
+                highlightDateContainerStyle={{ backgroundColor: '#00bfff' }}
+                markedDates={markedDates}
+                // datesBlacklist={datesBlacklistFunc}
+                selectedDate={selectedDate}
+                onDateSelected={onDateSelected}
             />
-            <AgendaList
-                sections={ITEMS}
-                initialNumToRender={11}
-                dayFormat="dddd dd-MM-yyyy"
+            <FlatList
+                data={orders}
                 renderItem={renderItem}
-                avoidDateUpdates={true}
-                scrollToNextEvent={false} // prevent re-render when scroll
-                viewOffset={11}
+                keyExtractor={item => item._id}
+                style={{ height: Dimensions.get('window').height - 200 }}
             />
-        </CalendarProvider>
+        </View>
     );
 }

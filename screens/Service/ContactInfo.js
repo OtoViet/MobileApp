@@ -106,7 +106,7 @@ export default function ContactInfo({ route, navigation }) {
                         flex: 1, flexDirection: 'row',
                         justifyContent: 'center'
                     }}>
-                        {loadingInfoCustomer !== 'error' && loadingInfoCustomer!=false ? <Switch value={isSwitchOn}
+                        {loadingInfoCustomer !== 'error' && loadingInfoCustomer ==false ? <Switch value={isSwitchOn}
                             color={Theme.colors.secondary}
                             onValueChange={onToggleSwitch} /> : null}
                     </View>

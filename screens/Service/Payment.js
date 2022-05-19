@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Theme from '../../theme/Theme';
 import * as Device from 'expo-device';
 import { View, Alert } from 'react-native';
@@ -49,30 +49,9 @@ async function registerForPushNotificationsAsync() {
     return token;
 }
 
-async function sendPushNotification(expoPushToken) {
-    const message = {
-        to: expoPushToken,
-        sound: 'default',
-        title: 'Original Title',
-        body: 'And here is the body!',
-        data: { someData: 'goes here' },
-    };
-
-    await fetch('https://exp.host/--/api/v2/push/send', {
-        method: 'POST',
-        headers: {
-            Accept: 'application/json',
-            'Accept-encoding': 'gzip, deflate',
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(message),
-    });
-}
-
-
 function AfterPaymentScreen({ route, navigation }) {
     const { data } = route.params;
-    const socket = io("http://192.168.1.75:5000", { transports: ['websocket', 'polling', 'flashsocket'] });
+    const socket = io("http://192.168.1.6:5000", { transports: ['websocket', 'polling', 'flashsocket'] });
 
     const [expoPushToken, setExpoPushToken] = useState('');
     const [notification, setNotification] = useState(false);
@@ -96,49 +75,48 @@ function AfterPaymentScreen({ route, navigation }) {
         };
     }, []);
 
-    // const handleClick = () => {
-    //     socket.on("connect", () => {
-    //         console.log(socket.id);
-    //     });
-    //     data.listServiceChoose = data.listServiceChoose.map((item, index) => {
-    //         return { ...item, idProduct: item._id, id: index }
-    //     });
-    //     console.log(data);
-    //     FormApi.createOrder(data)
-    //         .then(resOrder => {
-    //             let titleNotify = "Có đơn hàng mới từ " + data.name;
-    //             let content = "chờ xác nhận";
-    //             FormApi.createNotification({
-    //                 title: titleNotify, content: content,
-    //                 from: data.email, type: "order",
-    //                 expoPushToken: expoPushToken,
-    //                 createdAt: resOrder.createdAt, detail: { idOrder: resOrder._id }
-    //             })
-    //                 .then(res => {
-    //                     socket.emit('send', {
-    //                         title: titleNotify, content: content,
-    //                         from: data.email, type: "order",
-    //                         createdAt: res.createdAt, detail: { idOrder: resOrder._id },
-    //                         isRead: false
-    //                     });
-    //                     Alert.alert('Thông báo', 'Đã gửi yêu cầu chăm sóc xe thành công!');
-    //                     navigation.navigate('Home');
-    //                 })
-    //                 .catch(err => {
-    //                     console.log(err);
-    //                 });
-    //         })
-    //         .catch(err => {
-    //             console.log(err);
-    //         });
-    // }
+    const handleClick = () => {
+        socket.on("connect", () => {
+            console.log(socket.id);
+        });
+        data.listServiceChoose = data.listServiceChoose.map((item, index) => {
+            return { ...item, idProduct: item._id, id: index }
+        });
+        FormApi.createOrder(data)
+            .then(resOrder => {
+                let titleNotify = "Có đơn hàng mới từ " + data.name;
+                let content = "chờ xác nhận";
+                FormApi.createNotification({
+                    title: titleNotify, content: content,
+                    from: data.email, type: "order",
+                    expoPushToken: expoPushToken,
+                    createdAt: resOrder.createdAt, detail: { idOrder: resOrder._id }
+                })
+                    .then(res => {
+                        socket.emit('send', {
+                            title: titleNotify, content: content,
+                            from: data.email, type: "order",
+                            createdAt: res.createdAt, detail: { idOrder: resOrder._id },
+                            isRead: false
+                        });
+                        Alert.alert('Thông báo', 'Đã gửi yêu cầu chăm sóc xe thành công!');
+                        navigation.navigate('Home');
+                    })
+                    .catch(err => {
+                        console.log(err);
+                    });
+            })
+            .catch(err => {
+                console.log(err);
+            });
+    }
     return (
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
             <Caption style={{ fontSize: 18, textAlign: 'center', marginBottom: 20 }}>
                 Vui lòng đến đúng giờ để tránh bất tiện, chúng tôi sẽ gửi cho bạn email nhắc nhở trước 1 ngày để bạn thu xếp thời gian
             </Caption>
             <Button icon="calendar-check" color={Theme.colors.secondary} mode="contained"
-                onPress={async()=> await sendPushNotification(expoPushToken)}>
+                onPress={handleClick}>
                 Xác nhận đặt lịch hẹn
             </Button>
         </View>
@@ -146,6 +124,7 @@ function AfterPaymentScreen({ route, navigation }) {
 }
 function VNPayScreen({ route, navigation }) {
     let { data } = route.params;
+    const socket = io("http://192.168.1.6:5000", { transports: ['websocket', 'polling', 'flashsocket'] });
     const [openWebview, setOpenWebview] = useState(false);
     const [url, setUrl] = useState('');
 
@@ -154,34 +133,59 @@ function VNPayScreen({ route, navigation }) {
         if (webViewState.url.includes('localhost')) {
             setOpenWebview(false);
             Alert.alert('Thông báo', 'Đã thanh toán thành công!');
-            navigation.navigate('Home');
+            navigation.navigate('VnPayReturn', { data: webViewState.url });
         }
     };
-    const handlePress = async () => {
-        console.log('data in vnpay screen');
-        console.log(data);
-        fetch('http://192.168.1.75:5000/api/order/create_payment_url', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                orderType: 'vehicle',
-                orderDescription: 'Thanh toán dịch vụ xe',
-                bankCode: '',
-                amount: data.totalPrice,
-                language: 'vn'
+    const handlePress = () => {
+        data.listServiceChoose = data.listServiceChoose.map((item, index) => {
+            return { ...item, idProduct: item._id, id: index }
+        });
+        FormApi.createOrder(data)
+            .then(resOrder => {
+                let titleNotify = "Có đơn hàng mới từ " + data.name;
+                let content = "chờ xác nhận";
+                FormApi.createNotification({
+                    title: titleNotify, content: content,
+                    from: data.email, type: "order",
+                    createdAt: resOrder.createdAt, detail: { idOrder: resOrder._id }
+                })
+                .then(res => {
+                    socket.emit('send', {
+                        title: titleNotify, content: content,
+                        from: data.email, type: "order",
+                        createdAt: res.createdAt, detail: { idOrder: resOrder._id },
+                        isRead: false
+                    });
+                    fetch('http://192.168.1.75:5000/api/order/create_payment_url', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            orderType: 'vehicle',
+                            orderDescription: 'Thanh toan dich vu oto viet cho don hang '+resOrder._id,
+                            bankCode: '',
+                            amount: data.totalPrice,
+                            language: 'vn'
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(responseJson => {
+                        if (responseJson.vnpUrl) {
+                            setUrl(responseJson.vnpUrl);
+                            setOpenWebview(true);
+                        }
+                    })
+                    .catch(error => {
+                        console.error(error);
+                    });
+                })
+                .catch(err => {
+                    console.log(err);
+                });
             })
-        })
-            .then(response => response.json())
-            .then(responseJson => {
-                if (responseJson.vnpUrl) {
-                    setUrl(responseJson.vnpUrl);
-                    setOpenWebview(true);
-                }
-            })
-            .catch(error => {
-                console.error(error);
+            .catch(err => {
+                console.log(err);
             });
     };
     if (openWebview) return <WebView

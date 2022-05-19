@@ -1,9 +1,8 @@
 import { Title, TextInput, Button, HelperText } from 'react-native-paper';
 import * as Yup from 'yup';
-import { View, Image, ScrollView, Alert } from 'react-native';
+import { View, ScrollView, Alert } from 'react-native';
 import { useFormik } from 'formik';
 import Theme from '../../theme';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import FormApi from '../../api/formApi';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
@@ -20,7 +19,14 @@ export default function ForgotPassword({ navigation }) {
         },
         validationSchema: forgotPasswordSchema,
         onSubmit: (values) => {
-            alert(JSON.stringify(values));
+            FormApi.forgotPassword(values).then(res => {
+                Alert.alert('Thông báo', 
+                'Chúng tôi đã gửi cho bạn một email xác nhận.Kiểm tra email để xác thực việc thay đổi mật khẩu.');
+                navigation.navigate('Home');
+            }).catch(err => {
+                console.log(err);
+                Alert.alert('Thông báo', 'Email không tồn tại hoặc có lỗi xảy ra vui lòng thử lại sau!');
+            });
         },
     });
     return (
