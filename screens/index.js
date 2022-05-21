@@ -1,4 +1,5 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { useState, useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import DetaiService from './Service/Detail';
 import Booking from './Service/Booking';
@@ -14,6 +15,7 @@ import FormApi from '../api/formApi';
 import useNotification from '../hooks/useNotification';
 import Notification from './Employees/Notification';
 import { navigationRef } from "../navigation/RootNavigation";
+import useGetInfoCustomer from '../hooks/useGetInfoCustomer';
 
 async function AutoRefreshToken() {
   console.log('goi ham refresh token');
@@ -30,14 +32,16 @@ async function AutoRefreshToken() {
       });
   }
 }
+
 const Stack = createNativeStackNavigator();
 export default function Screen() {
   // const ref = useRef();
   // useEffect(() => {
-  //   const interval = setInterval(AutoRefreshToken, 1 * 60000)
-  //   ref.current = interval
-  //   return () => clearInterval(interval)
-  // }, []);
+    //   const interval = setInterval(AutoRefreshToken, 1 * 60000)
+    //   ref.current = interval
+    //   return () => clearInterval(interval)
+    // }, []);
+    
   useNotification();
   return <NavigationContainer ref={navigationRef}>
     <Stack.Navigator >

@@ -30,10 +30,10 @@ export default function Login({ navigation }) {
                 AsyncStorage.setItem('refreshToken', res.refreshToken);
                 FormApi.getInfoCustomer().then(res => {
                     AsyncStorage.setItem('role',res.roles);
+                    navigation.navigate('Home', {data: res.roles});
                 }).catch(err => {
                     console.log(err);
                 });
-                navigation.navigate('Home');
             }).catch(err => {
                 Alert.alert('Thông báo', 'Có lỗi xảy ra khi đăng nhập, sai tên tài khoản hoặc mật khẩu!');
             });

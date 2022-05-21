@@ -8,7 +8,8 @@ function useGetInfoCustomer(isFocused, isRefreshed) {
         setLoading(true);
         FormApi.getInfoCustomer().then((infoRes) => {
             setInfo(infoRes);
-            setLoading(false)
+            setLoading(false);
+            AsyncStorage.setItem('role', infoRes.roles);
         })
         .catch((error) => {
             AsyncStorage.removeItem('token');

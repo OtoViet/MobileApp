@@ -11,20 +11,8 @@ function useGetAllEmployee(isFocused, isRefreshed) {
             setLoading(false)
         })
         .catch((error) => {
-            FormApi.token({ refreshToken: localStorage.getItem('refreshToken') }).then((res) => {
-                localStorage.setItem('token', res.accessToken);
-                localStorage.setItem('refreshToken', res.refreshToken);
-                FormApi.getAllEmployee().then((employees) => {
-                    setEmployees(employees);
-                    setLoading(false)
-                })
-                    .catch((error) => {
-                        console.log(error);
-                    });
-            })
-                .catch((error) => {
-                    console.log(error);
-                });
+            console.log(error);
+            setLoading('error');
         });
     };
     useEffect(() => {

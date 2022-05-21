@@ -19,29 +19,36 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Entypo from 'react-native-vector-icons/Entypo';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import History from '../screens/Employees/History';
+import useGetInfoCustomer from '../hooks/useGetInfoCustomer';
+import {Text} from 'react-native';
+import { set } from 'react-native-reanimated';
+
 const Drawer = createDrawerNavigator();
 
 export default function Navigation({ route, navigation }) {
-  const [role, setRole] = useState(null);
+  const [role, setRole] = useState('waiting');
   const [token, setToken] = useState(null);
+  useGetInfoCustomer();
   const [refreshToken, setRefreshToken] = useState(null);
-
   AsyncStorage.getItem('role').then(res => {
     setRole(res);
   }).catch(err => {
     console.log(err);
+    setRole(null);
   });
   AsyncStorage.getItem('token').then(res => {
     setToken(res);
   }).catch(err => {
     console.log(err);
+    setRole(null);
   });
   AsyncStorage.getItem('refreshToken').then(res => {
     setRefreshToken(res);
   }).catch(err => {
     console.log(err);
+    setRole(null);
   });
-  
+  console.log('co chayvao day');
   if (role == 'customer' || role == null || role=='admin') {
     return (
       <>
