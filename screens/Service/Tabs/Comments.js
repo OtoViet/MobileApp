@@ -47,7 +47,7 @@ export default function Comments({ route, navigation }) {
         },
     });
     const handlePreviousPage = () => {
-        setPages(pages > 1 ? pages - 1 : 0);
+        setPages(pages > 1 ? pages - 1 : 1);
     }
     const handleFirstPage = () => {
         setPages(1);

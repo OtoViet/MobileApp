@@ -16,7 +16,7 @@ import FormApi from '../../api/formApi';
 
 export default function Detail({ route, navigation }) {
     const { data } = route.params;
-    const socket = io("http://192.168.1.75:5000", { transports: ['websocket', 'polling', 'flashsocket'] });
+    const socket = io("https://luanvanapi.azurewebsites.net", { transports: ['websocket', 'polling', 'flashsocket'] });
     const [loading, order] = useGetOrderById(data);
 
     const dataTimeline = [
@@ -101,10 +101,12 @@ export default function Detail({ route, navigation }) {
         <View style={styles.container}>
             <Headline style={{ textAlign: 'center' }}>Chi tiết lịch hẹn</Headline>
             <Title>Người đặt lịch: {order.contactInfo.name}</Title>
+            <Title>Email đặt: {order.contactInfo.email}</Title>
             <Title>Thời gian đặt: {moment(order.createdAt).format('DD/MM/YYYY')}</Title>
             <Title>Dịch vụ đã chọn: {order.listService.map((item,index)=>{
                 return <Text key={index}>{item.productName}, </Text>
             })}</Title>
+            <Title>Combo: {order.combo}</Title>
             <Title>Tổng tiền: {Math.round(order.totalPrice).toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,') + '₫ '}</Title>
             <Title>Thời gian hẹn: {moment(order.dateAppointment).locale('vi').format('LLLL')}</Title>
             <Headline style={{ textAlign: 'center' }}>Trạng thái lịch hẹn</Headline>
@@ -124,13 +126,16 @@ export default function Detail({ route, navigation }) {
                 }}
                 innerCircle={'icon'}
             />
-            <Button
-                style={{ marginBottom: 20 }}
-                icon="cancel" color={Theme.colors.secondary}
-                mode="contained"
-                onPress={handlePressCancelOrder}>
-                Hủy lịch hẹn
-            </Button>
+            {
+                order.isCompleted ? null :
+                <Button
+                    style={{ marginBottom: 20 }}
+                    icon="cancel" color={Theme.colors.secondary}
+                    mode="contained"
+                    onPress={handlePressCancelOrder}>
+                    Hủy lịch hẹn
+                </Button>
+            }
         </View>
     );
 }

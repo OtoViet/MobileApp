@@ -11,7 +11,7 @@ import useGetAllStore from '../../hooks/useGetAllStore';
 import { Table, Row } from 'react-native-table-component';
 import useGetAllProduct from '../../hooks/useGetAllProduct';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
-import { Checkbox, Text, Headline, RadioButton, Button, TextInput } from 'react-native-paper';
+import { Checkbox, Text, Headline, RadioButton, Button, TextInput, Title } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 const Booking = ({ route, navigation }) => {
@@ -162,6 +162,15 @@ const Booking = ({ route, navigation }) => {
                 </View>
 
                 <Headline style={{ textAlign: 'center', marginVertical: 20 }}>Chọn Kích cỡ xe</Headline>
+                <Title>
+                    <MaterialCommunityIcons name="asterisk" size={20} color={Theme.colors.secondary} /> Kích thước xe nhỏ: là các dòng xe mini hay hatchback (VD: Hyundai i10, Kia Morning, Toyota Wigo, Suzuki Celerio,..)
+                </Title>
+                <Title>
+                    <MaterialCommunityIcons name="asterisk" size={20} color={Theme.colors.secondary} /> Kích thước xe vừa: là các dòng xe middle sedan & sedan (VD: Mazda 3, Camry, Toyota Vios, Honda City,...)
+                </Title>
+                <Title>
+                    <MaterialCommunityIcons name="asterisk" size={20} color={Theme.colors.secondary} /> Kích thước xe lớn: là các dòng xe SUV, CUV, MPV hoặc Pickup (VD: CX5-8, Everest, Ford Ranger,Land Rover, Lexus 570,...)
+                </Title>
                 <RadioButton.Group onValueChange={newValue => setCarSize(newValue)} value={carSize}>
                     <View style={{
                         marginBottom: 20, height: 100, flex: 1, flexDirection: 'row',
@@ -245,12 +254,12 @@ const Booking = ({ route, navigation }) => {
                         <Table borderStyle={{ borderWidth: 1, borderColor: '#C1C0B9' }}>
                             {
                                 tableData.map((rowData, index) => {
-                                    let backgroundIndex = index % 2 ? 'white' :'#f3f6f4';
+                                    let backgroundIndex = index % 2 ? 'white' : '#f3f6f4';
                                     return <Row
                                         key={index}
                                         data={rowData}
                                         widthArr={widthArr}
-                                        style={{ height: 40, backgroundColor:backgroundIndex }}
+                                        style={{ height: 40, backgroundColor: backgroundIndex }}
                                         textStyle={{ textAlign: 'center', fontWeight: '100' }}
                                     />;
                                 })

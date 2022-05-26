@@ -51,7 +51,7 @@ async function registerForPushNotificationsAsync() {
 
 function AfterPaymentScreen({ route, navigation }) {
     const { data } = route.params;
-    const socket = io("http://192.168.1.6:5000", { transports: ['websocket', 'polling', 'flashsocket'] });
+    const socket = io("https://luanvanapi.azurewebsites.net", { transports: ['websocket', 'polling', 'flashsocket'] });
 
     const [expoPushToken, setExpoPushToken] = useState('');
     const [notification, setNotification] = useState(false);
@@ -124,7 +124,7 @@ function AfterPaymentScreen({ route, navigation }) {
 }
 function VNPayScreen({ route, navigation }) {
     let { data } = route.params;
-    const socket = io("http://192.168.1.6:5000", { transports: ['websocket', 'polling', 'flashsocket'] });
+    const socket = io("https://luanvanapi.azurewebsites.net", { transports: ['websocket', 'polling', 'flashsocket'] });
     const [openWebview, setOpenWebview] = useState(false);
     const [url, setUrl] = useState('');
 
@@ -156,7 +156,7 @@ function VNPayScreen({ route, navigation }) {
                         createdAt: res.createdAt, detail: { idOrder: resOrder._id },
                         isRead: false
                     });
-                    fetch('http://192.168.1.75:5000/api/order/create_payment_url', {
+                    fetch('https://luanvanapi.azurewebsites.net/api/order/create_payment_url', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
